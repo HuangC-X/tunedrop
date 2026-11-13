@@ -1,0 +1,1281 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="data:," />
+    <title>TuneDrop</title>
+    <style>
+      :root {
+        --bg: #0b0b12;
+        --surface: #14141e;
+        --surface-2: #1c1c29;
+        --line: rgba(235, 235, 245, 0.09);
+        --line-strong: rgba(235, 235, 245, 0.18);
+        --text: #f5f5f7;
+        --text-2: #a6a6b8;
+        --text-3: #7e7e90;
+        --accent: #c8ff3d;
+        --accent-hover: #d6ff66;
+        --accent-ink: #131603;
+        --error: #ff9d8f;
+        --overlay: rgba(4, 4, 9, 0.66);
+        --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, -apple-system, "Segoe UI", Roboto, sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+      h1, h2, h3, p { margin: 0; }
+      button, input, select { font: inherit; color: inherit; }
+      button { cursor: pointer; background: none; border: none; padding: 0; }
+      a { color: inherit; text-decoration: none; }
+      ul { margin: 0; padding: 0; list-style: none; }
+      .tnum { font-variant-numeric: tabular-nums; }
+      :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+      .wrap { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+
+      /* ---------- header ---------- */
+      header.site {
+        position: sticky; top: 0; z-index: 40;
+        background: var(--bg);
+        border-bottom: 1px solid var(--line);
+      }
+      .header-in { display: flex; align-items: center; gap: 32px; height: 64px; }
+      .brand { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+      .brand-name { font-size: 20px; font-weight: 500; }
+      nav.main { display: flex; gap: 28px; margin-left: 8px; }
+      nav.main a { font-size: 14px; font-weight: 500; color: var(--text-2); padding: 8px 0; transition: color 160ms var(--ease); }
+      nav.main a:hover { color: var(--text); }
+      .header-actions { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+      .btn {
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        height: 44px; padding: 0 20px; border-radius: 8px;
+        font-size: 14px; font-weight: 500; white-space: nowrap;
+        transition: background-color 160ms var(--ease), border-color 160ms var(--ease), color 160ms var(--ease);
+      }
+      .btn-primary { background: var(--accent); color: var(--accent-ink); }
+      .btn-primary:hover { background: var(--accent-hover); }
+      .btn-ghost { border: 1px solid var(--line-strong); color: var(--text); }
+      .btn-ghost:hover { border-color: var(--text-3); }
+      .btn-small { height: 40px; padding: 0 16px; }
+      .btn-block { width: 100%; }
+      .btn[disabled] { opacity: 0.45; cursor: default; }
+      .icon-btn {
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        min-width: 44px; height: 44px; padding: 0 12px; border-radius: 8px; color: var(--text);
+        transition: background-color 160ms var(--ease);
+      }
+      .icon-btn:hover { background: var(--surface-2); }
+      .cart-count { font-size: 14px; font-weight: 500; color: var(--text-2); }
+      .account-chip { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px 0 8px; border-radius: 8px; font-size: 14px; font-weight: 500; transition: background-color 160ms var(--ease); }
+      .account-chip:hover { background: var(--surface-2); }
+      .avatar { width: 28px; height: 28px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--line-strong); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; color: var(--text); }
+
+      /* ---------- hero ---------- */
+      .hero { display: grid; grid-template-columns: 7fr 5fr; gap: 48px; padding: 64px 0 8px; align-items: start; }
+      .hero-copy { padding-top: 24px; }
+      .hero-eyebrow { font-size: 14px; font-weight: 500; color: var(--text-2); margin-bottom: 16px; }
+      h1 { font-size: 40px; line-height: 1.15; font-weight: 500; max-width: 520px; }
+      .hero-sub { margin-top: 20px; font-size: 16px; color: var(--text-2); max-width: 480px; }
+      .hero-actions { display: flex; gap: 12px; margin-top: 32px; flex-wrap: wrap; }
+      .hero-meta { margin-top: 32px; font-size: 14px; color: var(--text-3); display: flex; flex-wrap: wrap; gap: 8px 12px; }
+      .hero-meta span:not(:last-child)::after { content: "·"; margin-left: 12px; color: var(--text-3); }
+      @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+      .rise { animation: rise 480ms var(--ease) both; }
+      @media (prefers-reduced-motion: reduce) {
+        .rise { animation: none; }
+        html { scroll-behavior: auto; }
+      }
+
+      .feature-card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 24px; }
+      .feature-head { display: flex; gap: 20px; }
+      .feature-cover { width: 128px; height: 128px; border-radius: 12px; flex-shrink: 0; overflow: hidden; }
+      .feature-cover svg, .cover svg { display: block; width: 100%; height: 100%; }
+      .feature-kicker { font-size: 12px; font-weight: 500; color: var(--text-3); margin-bottom: 8px; }
+      .feature-title { font-size: 20px; font-weight: 500; line-height: 1.25; }
+      .feature-artist { font-size: 14px; color: var(--text-2); margin-top: 4px; }
+      .feature-meta { font-size: 12px; color: var(--text-3); margin-top: 8px; }
+      .price-row { display: flex; align-items: baseline; gap: 12px; margin-top: 16px; }
+      .price-now { font-size: 24px; font-weight: 500; color: var(--text); }
+      .price-was { font-size: 14px; color: var(--text-3); text-decoration: line-through; }
+      .feature-tracks { margin-top: 20px; border-top: 1px solid var(--line); }
+      .mini-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+      .mini-row:last-child { border-bottom: none; padding-bottom: 4px; }
+      .play-btn {
+        width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0;
+        display: inline-flex; align-items: center; justify-content: center;
+        border: 1px solid var(--line-strong); color: var(--text);
+        transition: background-color 160ms var(--ease), color 160ms var(--ease), border-color 160ms var(--ease);
+      }
+      .play-btn:hover { border-color: var(--text-3); }
+      .play-btn.playing { background: var(--surface-2); border-color: var(--text-3); color: var(--text); }
+      .mini-num { font-size: 12px; color: var(--text-3); width: 20px; text-align: right; }
+      .mini-title { font-size: 14px; font-weight: 500; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .mini-dur { font-size: 12px; color: var(--text-3); }
+      .mini-price { font-size: 14px; font-weight: 500; color: var(--text); width: 44px; text-align: right; }
+      .feature-cta { margin-top: 20px; }
+
+      /* ---------- sections ---------- */
+      section.block { padding-top: 80px; }
+      .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+      h2 { font-size: 24px; font-weight: 500; }
+      .see-all { font-size: 14px; font-weight: 500; color: var(--text); display: inline-flex; align-items: center; gap: 4px; padding: 8px 0; }
+      .section-sub { font-size: 14px; color: var(--text-2); margin-top: 8px; }
+
+      .search-bar { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; height: 52px; padding: 0 16px; }
+      .search-bar svg { flex-shrink: 0; color: var(--text-3); }
+      .search-bar input { flex: 1; min-width: 0; background: none; border: none; outline: none; font-size: 16px; color: var(--text); height: 100%; }
+      .search-bar input::placeholder { color: var(--text-3); }
+
+      .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+      .chip {
+        height: 40px; padding: 0 16px; border-radius: 8px; font-size: 14px; font-weight: 500;
+        background: var(--surface); border: 1px solid var(--line); color: var(--text);
+        transition: background-color 160ms var(--ease), color 160ms var(--ease), border-color 160ms var(--ease);
+      }
+      .chip:hover { border-color: var(--text-3); }
+      .chip.active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+      .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 28px; }
+      .track-card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; }
+      .cover { border-radius: 12px; overflow: hidden; aspect-ratio: 1; position: relative; }
+      .cover-play {
+        position: absolute; right: 12px; bottom: 12px; width: 44px; height: 44px; border-radius: 8px;
+        background: var(--bg); color: var(--text); display: inline-flex; align-items: center; justify-content: center;
+        border: 1px solid var(--line-strong);
+        transition: background-color 160ms var(--ease), color 160ms var(--ease);
+      }
+      .cover-play.playing { background: var(--surface-2); color: var(--text); border-color: var(--text-3); }
+      .card-title { font-size: 16px; font-weight: 500; margin-top: 16px; line-height: 1.3; min-height: 42px; }
+      .card-artist { font-size: 14px; color: var(--text-2); margin-top: 4px; }
+      .card-meta { font-size: 12px; color: var(--text-3); margin-top: 8px; }
+      .card-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: auto; padding-top: 16px; border-top: 1px solid var(--line); }
+      .card-price { font-size: 16px; font-weight: 500; color: var(--text); }
+      .add-btn {
+        height: 40px; padding: 0 16px; border-radius: 8px; font-size: 14px; font-weight: 500;
+        border: 1px solid var(--line-strong); color: var(--text);
+        display: inline-flex; align-items: center; gap: 8px;
+        transition: background-color 160ms var(--ease), border-color 160ms var(--ease), color 160ms var(--ease);
+      }
+      .add-btn:hover { border-color: var(--text-3); }
+      .add-btn.in-cart { background: var(--surface-2); color: var(--text-2); }
+      .add-btn.owned { color: var(--text-2); border-color: var(--line); }
+      .card-top { flex: 1; }
+
+      .empty-box { border: 1px solid var(--line); border-radius: 16px; padding: 32px; margin-top: 28px; background: var(--surface); }
+      .empty-box h3 { font-size: 16px; font-weight: 500; }
+      .empty-box p { font-size: 14px; color: var(--text-2); margin-top: 8px; }
+      .chart-list { margin-top: 20px; }
+      .chart-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+      .chart-row:last-child { border-bottom: none; }
+      .chart-rank { font-size: 14px; font-weight: 500; color: var(--text-3); width: 24px; }
+
+      /* ---------- album ---------- */
+      .album-layout { display: grid; grid-template-columns: 5fr 7fr; gap: 48px; align-items: start; }
+      .album-cover { border-radius: 12px; overflow: hidden; aspect-ratio: 1; }
+      .album-info h3 { font-size: 24px; font-weight: 500; margin-top: 20px; }
+      .album-artist { font-size: 16px; color: var(--text-2); margin-top: 4px; }
+      .album-meta { font-size: 14px; color: var(--text-3); margin-top: 12px; }
+      .album-cta { display: flex; align-items: center; gap: 20px; margin-top: 24px; flex-wrap: wrap; }
+      .track-table { border-top: 1px solid var(--line); }
+      .trow { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+      .trow .mini-title { font-size: 16px; }
+      .row-add { height: 40px; padding: 0 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--text-2); display: inline-flex; align-items: center; gap: 4px; transition: background-color 160ms var(--ease), color 160ms var(--ease); }
+      .row-add:hover { color: var(--text); }
+      .row-add:hover { background: var(--surface-2); }
+      .row-add.in-cart { color: var(--text-2); }
+
+      /* ---------- steps / pricing ---------- */
+      .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+      .step { border: 1px solid var(--line); border-radius: 16px; padding: 24px; background: var(--surface); }
+      .step-num { font-size: 24px; font-weight: 500; color: var(--text-3); }
+      .step h3 { font-size: 16px; font-weight: 500; margin-top: 16px; }
+      .step p { font-size: 14px; color: var(--text-2); margin-top: 8px; }
+      .pricing { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+      .price-card { border: 1px solid var(--line); border-radius: 16px; padding: 24px; background: var(--surface); display: flex; flex-direction: column; }
+      .price-card.highlight { border-color: var(--accent); }
+      .price-name { font-size: 14px; font-weight: 500; color: var(--text-2); }
+      .price-amount { font-size: 32px; font-weight: 500; margin-top: 12px; }
+      .price-card.highlight .price-amount { color: var(--text); }
+      .price-per { font-size: 14px; color: var(--text-3); margin-top: 4px; }
+      .price-feats { margin-top: 20px; display: grid; gap: 12px; }
+      .price-feats li { display: flex; gap: 8px; font-size: 14px; color: var(--text-2); align-items: flex-start; }
+      .price-feats svg { flex-shrink: 0; margin-top: 2px; color: var(--text-3); }
+
+      /* ---------- library ---------- */
+      .lib-row { display: flex; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+      .lib-row:first-child { border-top: 1px solid var(--line); }
+      .lib-cover { width: 56px; height: 56px; border-radius: 12px; overflow: hidden; flex-shrink: 0; }
+      .lib-main { flex: 1; min-width: 0; }
+      .lib-title { font-size: 16px; font-weight: 500; }
+      .lib-meta { font-size: 12px; color: var(--text-3); margin-top: 4px; }
+      .lib-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+      .fmt-select { height: 40px; border-radius: 8px; background: var(--surface); border: 1px solid var(--line-strong); color: var(--text); padding: 0 8px; font-size: 14px; }
+
+      /* ---------- cta / footer ---------- */
+      .cta { margin-top: 80px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 48px; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+      .cta h2 { color: var(--text); font-size: 28px; }
+      .cta p { color: var(--text-2); font-size: 16px; margin-top: 8px; }
+      footer.site { margin-top: 80px; border-top: 1px solid var(--line); padding: 48px 0 120px; }
+      .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 32px; }
+      .footer-brand p { font-size: 14px; color: var(--text-3); margin-top: 16px; max-width: 260px; }
+      .footer-col h3 { font-size: 14px; font-weight: 500; margin-bottom: 16px; }
+      .footer-col li { margin-bottom: 12px; }
+      .footer-col a { font-size: 14px; color: var(--text-2); transition: color 160ms var(--ease); }
+      .footer-col a:hover { color: var(--text); }
+      .footer-base { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--line); font-size: 12px; color: var(--text-3); }
+
+      /* ---------- player bar ---------- */
+      .player {
+        position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+        background: var(--surface); border-top: 1px solid var(--line-strong);
+        transform: translateY(100%); transition: transform 240ms var(--ease);
+      }
+      .player.show { transform: translateY(0); }
+      .player-in { max-width: 1160px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; gap: 16px; }
+      .player-cover { width: 48px; height: 48px; border-radius: 8px; overflow: hidden; flex-shrink: 0; }
+      .player-info { min-width: 0; width: 220px; }
+      .player-title { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .player-artist { font-size: 12px; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .player-mid { flex: 1; display: flex; align-items: center; gap: 12px; }
+      .player-time { font-size: 12px; color: var(--text-3); width: 76px; }
+      .player-time.right { text-align: left; width: 88px; }
+      .progress { flex: 1; height: 4px; border-radius: 2px; background: var(--surface-2); overflow: hidden; }
+      .progress-fill { height: 100%; width: 0%; background: var(--text); border-radius: 2px; }
+      .player-tag { font-size: 12px; color: var(--text-3); white-space: nowrap; }
+
+      /* ---------- drawer / modals ---------- */
+      .scrim { position: fixed; inset: 0; background: var(--overlay); z-index: 60; opacity: 0; pointer-events: none; transition: opacity 200ms var(--ease); }
+      .scrim.show { opacity: 1; pointer-events: auto; }
+      .drawer {
+        position: fixed; top: 0; right: 0; bottom: 0; z-index: 70; width: min(420px, 100%);
+        background: var(--surface); border-left: 1px solid var(--line-strong);
+        transform: translateX(100%); visibility: hidden;
+        transition: transform 240ms var(--ease), visibility 0s linear 240ms;
+        display: flex; flex-direction: column;
+      }
+      .drawer.show { transform: translateX(0); visibility: visible; transition: transform 240ms var(--ease); }
+      .drawer-head { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--line); }
+      .drawer-head h2 { font-size: 20px; }
+      .drawer-body { flex: 1; overflow-y: auto; padding: 8px 24px; }
+      .drawer-foot { padding: 20px 24px; border-top: 1px solid var(--line); display: grid; gap: 12px; }
+      .cart-row { display: flex; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--line); align-items: center; }
+      .cart-cover { width: 48px; height: 48px; border-radius: 8px; overflow: hidden; flex-shrink: 0; }
+      .cart-main { flex: 1; min-width: 0; }
+      .cart-title { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .cart-artist { font-size: 12px; color: var(--text-2); }
+      .cart-price { font-size: 14px; font-weight: 500; }
+      .remove-btn { width: 40px; height: 40px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: var(--text-3); transition: color 160ms var(--ease), background-color 160ms var(--ease); }
+      .remove-btn:hover { color: var(--text); background: var(--surface-2); }
+      .sum-row { display: flex; justify-content: space-between; font-size: 14px; color: var(--text-2); }
+      .sum-row.total { font-size: 16px; font-weight: 500; color: var(--text); }
+      .drawer-empty { padding: 48px 0; text-align: center; color: var(--text-2); font-size: 14px; }
+      .seg { display: flex; background: var(--surface-2); border-radius: 8px; padding: 4px; gap: 4px; }
+      .seg button { flex: 1; height: 36px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--text-2); transition: background-color 160ms var(--ease), color 160ms var(--ease); }
+      .seg button.active { background: var(--bg); color: var(--text); }
+      .field { display: grid; gap: 8px; margin-top: 16px; }
+      .field label { font-size: 14px; font-weight: 500; color: var(--text-2); }
+      .field input {
+        height: 48px; border-radius: 8px; background: var(--bg); border: 1px solid var(--line-strong);
+        padding: 0 16px; font-size: 16px; color: var(--text); outline: none; width: 100%;
+        transition: border-color 160ms var(--ease);
+      }
+      .field input:focus { border-color: var(--accent); }
+      .field .hint { font-size: 12px; color: var(--text-3); }
+      .field .err { font-size: 12px; color: var(--error); display: none; }
+      .field.invalid input { border-color: var(--error); }
+      .field.invalid .err { display: block; }
+      .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .secure-note { display: flex; gap: 8px; align-items: center; font-size: 12px; color: var(--text-3); margin-top: 16px; }
+      .success-mark { width: 56px; height: 56px; border-radius: 50%; border: 1px solid var(--accent); color: var(--accent); display: flex; align-items: center; justify-content: center; margin: 32px auto 0; }
+      .success-title { text-align: center; font-size: 20px; font-weight: 500; margin-top: 20px; }
+      .success-sub { text-align: center; font-size: 14px; color: var(--text-2); margin-top: 8px; }
+      .order-meta { text-align: center; font-size: 12px; color: var(--text-3); margin-top: 12px; }
+
+      .modal {
+        position: fixed; inset: 0; z-index: 70; display: none; align-items: center; justify-content: center; padding: 24px;
+        background: var(--overlay);
+      }
+      .modal.show { display: flex; }
+      .modal-card { background: var(--surface); border: 1px solid var(--line-strong); border-radius: 16px; width: 100%; max-width: 440px; max-height: calc(100vh - 48px); overflow-y: auto; padding: 32px; position: relative; }
+      .modal-card.wide { max-width: 680px; }
+      .modal-close { position: absolute; top: 16px; right: 16px; }
+      .modal-card h2 { font-size: 24px; padding-right: 40px; }
+      .modal-sub { font-size: 14px; color: var(--text-2); margin-top: 8px; }
+      .modal-foot { margin-top: 24px; font-size: 14px; color: var(--text-2); text-align: center; }
+      .modal-foot button { color: var(--text); font-weight: 500; padding: 8px; text-decoration: underline; text-underline-offset: 3px; }
+      .detail-layout { display: grid; grid-template-columns: 220px 1fr; gap: 28px; }
+      .detail-cover { border-radius: 12px; overflow: hidden; aspect-ratio: 1; }
+      .fmt-list { display: grid; gap: 8px; margin-top: 20px; }
+      .fmt-row { display: flex; align-items: center; gap: 12px; border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; cursor: pointer; transition: border-color 160ms var(--ease); min-height: 56px; }
+      .fmt-row:hover { border-color: var(--text-3); }
+      .fmt-row.selected { border-color: var(--accent); }
+      .fmt-row input { accent-color: var(--accent); width: 18px; height: 18px; }
+      .fmt-name { font-size: 14px; font-weight: 500; }
+      .fmt-note { font-size: 12px; color: var(--text-3); }
+      .fmt-tag { margin-left: auto; font-size: 12px; color: var(--text-3); }
+      .detail-meta { display: grid; gap: 8px; margin-top: 20px; font-size: 14px; }
+      .detail-meta div { display: flex; justify-content: space-between; gap: 16px; }
+      .detail-meta dt { color: var(--text-3); }
+      .detail-meta dd { margin: 0; font-weight: 500; }
+
+      .toast {
+        position: fixed; left: 24px; bottom: 24px; z-index: 80; background: var(--surface-2);
+        border: 1px solid var(--line-strong); border-radius: 8px; padding: 12px 16px;
+        display: flex; align-items: center; gap: 16px; font-size: 14px;
+        opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity 200ms var(--ease), transform 200ms var(--ease);
+        max-width: calc(100vw - 48px);
+      }
+      .toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+      .toast button { color: var(--accent); font-weight: 500; padding: 8px 4px; }
+
+      /* ---------- responsive ---------- */
+      @media (max-width: 960px) {
+        .grid { grid-template-columns: repeat(3, 1fr); }
+        .hero { grid-template-columns: 1fr; gap: 40px; padding-top: 48px; }
+        .hero-copy { padding-top: 0; }
+        .album-layout { grid-template-columns: 1fr; gap: 32px; }
+        .album-cover { max-width: 320px; }
+        .footer-grid { grid-template-columns: 1fr 1fr; }
+      }
+      @media (max-width: 680px) {
+        .wrap { padding: 0 20px; }
+        nav.main { display: none; }
+        .grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .steps, .pricing { grid-template-columns: 1fr; }
+        h1 { font-size: 32px; }
+        .cta { flex-direction: column; align-items: flex-start; padding: 32px; }
+        .detail-layout { grid-template-columns: 1fr; }
+        .detail-cover { max-width: 200px; }
+        .player-info { width: auto; flex: 1; }
+        .player-tag { display: none; }
+        .player-time.right { display: none; }
+        .feature-head { flex-direction: column; }
+        .header-in { gap: 16px; }
+        .btn-signin-text { display: none; }
+        section.block { padding-top: 64px; }
+        .lib-row { flex-wrap: wrap; }
+        .lib-actions { flex-basis: 100%; justify-content: flex-end; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site">
+      <div class="wrap header-in">
+        <a class="brand" href="#top" aria-label="TuneDrop home">
+          <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#c8ff3d"/><rect x="7.5" y="12" width="3" height="8" rx="1.5" fill="#0b0b12"/><rect x="12.5" y="8" width="3" height="16" rx="1.5" fill="#0b0b12"/><rect x="17.5" y="11" width="3" height="11" rx="1.5" fill="#0b0b12"/><rect x="22.5" y="9" width="3" height="14" rx="1.5" fill="#0b0b12"/></svg>
+          <span class="brand-name">TuneDrop</span>
+        </a>
+        <nav class="main" aria-label="Main">
+          <a href="#trending">Trending</a>
+          <a href="#album">Album of the week</a>
+          <a href="#how">How it works</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#library">Library</a>
+        </nav>
+        <div class="header-actions">
+          <span id="auth-area"></span>
+          <button class="icon-btn" id="cart-btn" aria-label="Open cart">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7h15l-1.5 9h-12z"/><path d="M6 7L5 3H2"/><circle cx="9" cy="20" r="1.6"/><circle cx="17" cy="20" r="1.6"/></svg>
+            <span class="cart-count tnum" id="cart-count"></span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main id="top">
+      <div class="wrap">
+        <!-- hero -->
+        <div class="hero">
+          <div class="hero-copy rise">
+            <p class="hero-eyebrow">Digital music store</p>
+            <h1>Download music, own it forever</h1>
+            <p class="hero-sub">Lossless FLAC and MP3 with no subscription and no streaming limits. Pay once, and the files are yours to keep.</p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="#trending">Browse trending</a>
+              <a class="btn btn-ghost" href="#how">How it works</a>
+            </div>
+            <p class="hero-meta"><span>FLAC lossless</span><span>MP3 320 kbps</span><span>WAV</span><span>DRM-free</span></p>
+          </div>
+          <div class="feature-card" aria-label="Featured album">
+            <div class="feature-head">
+              <div class="feature-cover" id="feature-cover"></div>
+              <div>
+                <p class="feature-kicker">Featured</p>
+                <p class="feature-title">Neon Horizons</p>
+                <p class="feature-artist">Midnight Circuit</p>
+                <p class="feature-meta tnum">12 tracks · 46 min · Electronic</p>
+                <div class="price-row">
+                  <span class="price-now tnum">$9.99</span>
+                  <span class="price-was tnum">$14.99</span>
+                </div>
+              </div>
+            </div>
+            <div class="feature-tracks" id="feature-tracks"></div>
+            <div class="feature-cta">
+              <button class="btn btn-ghost btn-block" id="feature-add">Add album to cart</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- trending + search -->
+        <section class="block" id="trending">
+          <div class="section-head">
+            <h2 id="grid-title">Trending now</h2>
+            <button class="see-all" id="see-all">See all
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+            </button>
+          </div>
+          <div class="search-bar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.8-3.8"/></svg>
+            <input id="search" type="search" placeholder="Search" aria-label="Search" />
+          </div>
+          <div class="chips" id="genre-chips" role="group" aria-label="Browse genres"></div>
+          <div class="grid" id="track-grid"></div>
+          <div id="grid-empty"></div>
+        </section>
+
+        <!-- album of the week -->
+        <section class="block" id="album">
+          <div class="section-head"><h2>Album of the week</h2></div>
+          <div class="album-layout">
+            <div>
+              <div class="album-cover" id="album-cover"></div>
+              <div class="album-info">
+                <h3>Neon Horizons</h3>
+                <p class="album-artist">Midnight Circuit</p>
+                <p class="album-meta tnum">2026 · Electronic · 12 tracks · 46 min</p>
+                <div class="album-cta">
+                  <div class="price-row" style="margin-top:0">
+                    <span class="price-now tnum">$9.99</span>
+                    <span class="price-was tnum">$14.99</span>
+                  </div>
+                  <button class="btn btn-primary" id="album-add">Add album to cart</button>
+                </div>
+                <p class="section-sub">Buying the album adds all 12 tracks. Every purchase includes FLAC, MP3 and WAV downloads.</p>
+              </div>
+            </div>
+            <div class="track-table" id="album-tracks"></div>
+          </div>
+        </section>
+
+        <!-- how it works -->
+        <section class="block" id="how">
+          <div class="section-head"><h2>How it works</h2></div>
+          <div class="steps">
+            <div class="step">
+              <p class="step-num tnum">1</p>
+              <h3>Search and preview</h3>
+              <p>Browse the catalogue and listen to a free 30-second preview of any track before you buy.</p>
+            </div>
+            <div class="step">
+              <p class="step-num tnum">2</p>
+              <h3>Pick your format</h3>
+              <p>MP3 320, FLAC or WAV. Every purchase includes all three, so you choose at download time.</p>
+            </div>
+            <div class="step">
+              <p class="step-num tnum">3</p>
+              <h3>Download and own</h3>
+              <p>DRM-free files with five downloads per purchase. Pay once, yours forever.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- pricing -->
+        <section class="block" id="pricing">
+          <div class="section-head"><h2>Simple pricing</h2></div>
+          <div class="pricing">
+            <div class="price-card">
+              <p class="price-name">Single</p>
+              <p class="price-amount tnum">$1.29</p>
+              <p class="price-per">per track</p>
+              <ul class="price-feats">
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>One track, all formats</li>
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>30-second free preview</li>
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>Five downloads included</li>
+              </ul>
+            </div>
+            <div class="price-card">
+              <p class="price-name">EP</p>
+              <p class="price-amount tnum">$4.99</p>
+              <p class="price-per">up to 6 tracks</p>
+              <ul class="price-feats">
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>Up to six tracks bundled</li>
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>All formats included</li>
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>Five downloads per track</li>
+              </ul>
+            </div>
+            <div class="price-card highlight">
+              <p class="price-name">Album</p>
+              <p class="price-amount tnum">$9.99</p>
+              <p class="price-per">full album</p>
+              <ul class="price-feats">
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>Every track on the album</li>
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>All formats included</li>
+                <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>Five downloads per track</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- library -->
+        <section class="block" id="library">
+          <div class="section-head"><h2>Your library</h2></div>
+          <div id="library-body"></div>
+        </section>
+
+        <!-- cta -->
+        <div class="cta">
+          <div>
+            <h2>Your library starts here</h2>
+            <p>Create a free account to keep your purchases in one place.</p>
+          </div>
+          <button class="btn btn-primary" id="cta-signup" style="height:48px;padding:0 24px">Create free account</button>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site">
+      <div class="wrap">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <a class="brand" href="#top">
+              <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#c8ff3d"/><rect x="7.5" y="12" width="3" height="8" rx="1.5" fill="#0b0b12"/><rect x="12.5" y="8" width="3" height="16" rx="1.5" fill="#0b0b12"/><rect x="17.5" y="11" width="3" height="11" rx="1.5" fill="#0b0b12"/><rect x="22.5" y="9" width="3" height="14" rx="1.5" fill="#0b0b12"/></svg>
+              <span class="brand-name" style="font-size:16px">TuneDrop</span>
+            </a>
+            <p>A digital music store for people who still want to own their music.</p>
+          </div>
+          <div class="footer-col">
+            <h3>Discover</h3>
+            <ul>
+              <li><a href="#trending">Trending</a></li>
+              <li><a href="#album">Album of the week</a></li>
+              <li><a href="#trending">Genres</a></li>
+              <li><a href="#pricing">Pricing</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h3>Company</h3>
+            <ul>
+              <li><a href="#how">How it works</a></li>
+              <li><a href="#library">Your library</a></li>
+              <li><a href="#top">About</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h3>Support</h3>
+            <ul>
+              <li><a href="#how">Help centre</a></li>
+              <li><a href="#top">Contact</a></li>
+              <li><a href="#top">Terms</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-base">
+          <span>© 2026 TuneDrop. All rights reserved.</span>
+          <span>Made for music lovers.</span>
+        </div>
+      </div>
+    </footer>
+
+    <!-- player bar -->
+    <div class="player" id="player" aria-label="Preview player">
+      <div class="player-in">
+        <div class="player-cover" id="player-cover"></div>
+        <div class="player-info">
+          <p class="player-title" id="player-title"></p>
+          <p class="player-artist" id="player-artist"></p>
+        </div>
+        <button class="play-btn playing" id="player-toggle" aria-label="Pause preview">
+          <svg id="player-toggle-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+        </button>
+        <div class="player-mid">
+          <span class="player-time tnum" id="player-cur">0:00</span>
+          <div class="progress"><div class="progress-fill" id="player-fill"></div></div>
+          <span class="player-time right tnum">0:30</span>
+        </div>
+        <span class="player-tag">Preview</span>
+        <button class="icon-btn" id="player-close" aria-label="Close player">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- cart drawer: contents are built when the cart opens -->
+    <div class="scrim" id="scrim"></div>
+    <aside class="drawer" id="drawer" aria-label="Cart and checkout"></aside>
+
+    <!-- track detail modal -->
+    <div class="modal" id="detail-modal" role="dialog" aria-modal="true" aria-label="Track details">
+      <div class="modal-card wide">
+        <button class="icon-btn modal-close" data-close aria-label="Close details">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <div class="detail-layout">
+          <div>
+            <div class="detail-cover" id="detail-cover"></div>
+          </div>
+          <div>
+            <p class="feature-kicker" id="detail-kind">Track</p>
+            <h2 id="detail-title"></h2>
+            <p class="modal-sub" id="detail-artist"></p>
+            <dl class="detail-meta tnum">
+              <div><dt>Genre</dt><dd id="detail-genre"></dd></div>
+              <div><dt>Duration</dt><dd id="detail-dur"></dd></div>
+              <div><dt>Released</dt><dd id="detail-year"></dd></div>
+              <div><dt>Downloads included</dt><dd>5 per purchase</dd></div>
+            </dl>
+            <div class="fmt-list" id="detail-formats" role="radiogroup" aria-label="Choose format"></div>
+            <div style="display:flex;gap:12px;margin-top:24px;flex-wrap:wrap">
+              <button class="btn btn-ghost" id="detail-preview">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
+                Preview
+              </button>
+              <button class="btn btn-primary" id="detail-add" style="flex:1"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- auth modal -->
+    <div class="modal" id="auth-modal" role="dialog" aria-modal="true" aria-label="Account">
+      <div class="modal-card">
+        <button class="icon-btn modal-close" data-close aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <h2 id="auth-title">Welcome back</h2>
+        <p class="modal-sub" id="auth-sub">Sign in to access your library.</p>
+        <form id="auth-form" novalidate>
+          <div class="field" id="auth-name-field" style="display:none">
+            <label for="auth-name">Username</label>
+            <input id="auth-name" type="text" autocomplete="username" placeholder="Your name" />
+            <p class="err">Enter a username</p>
+          </div>
+          <div class="field" id="auth-email-field">
+            <label for="auth-email">Email</label>
+            <input id="auth-email" type="email" autocomplete="email" placeholder="you@email.com" />
+            <p class="err">Enter a valid email address</p>
+          </div>
+          <div class="field" id="auth-pass-field">
+            <label for="auth-pass">Password</label>
+            <input id="auth-pass" type="password" autocomplete="current-password" placeholder="Your password" />
+            <p class="hint" id="auth-pass-hint" style="display:none">Minimum 8 characters</p>
+            <p class="err">Password needs at least 8 characters</p>
+          </div>
+          <button class="btn btn-primary btn-block" id="auth-submit" type="submit" style="margin-top:24px">Sign in</button>
+        </form>
+        <p class="modal-foot"><span id="auth-switch-label">New to TuneDrop?</span>
+          <button id="auth-switch">Create account</button>
+        </p>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status"></div>
+
+    <script>
+      "use strict";
+      /* ================= data ================= */
+      const ALBUM = { id: "alb-neon-horizons", title: "Neon Horizons", artist: "Midnight Circuit", genre: "Electronic", year: 2026, price: 9.99, was: 14.99 };
+      const TRACKS = [
+        { id: "t01", title: "Neon Skyline", artist: "Midnight Circuit", genre: "Electronic", price: 1.29, dur: 222, year: 2026, field: 0, motif: 0, seed: 3, trending: true, album: ALBUM.id, no: 1 },
+        { id: "t02", title: "Solar Drift", artist: "Aria Vale", genre: "Pop", price: 1.29, dur: 214, year: 2025, field: 1, motif: 1, seed: 7, trending: true },
+        { id: "t03", title: "Velvet Static", artist: "The Lowtones", genre: "Rock", price: 0.99, dur: 247, year: 2024, field: 2, motif: 2, seed: 5, trending: true },
+        { id: "t04", title: "Glass Oceans", artist: "Nami K", genre: "Lo-Fi", price: 1.49, dur: 196, year: 2025, field: 3, motif: 3, seed: 9, trending: true },
+        { id: "t05", title: "Paper Sun", artist: "Aria Vale", genre: "Pop", price: 1.29, dur: 203, year: 2026, field: 2, motif: 1, seed: 12, trending: true },
+        { id: "t06", title: "Corner Store Flowers", artist: "Juno Park", genre: "Hip-Hop", price: 1.29, dur: 231, year: 2025, field: 3, motif: 2, seed: 4, trending: true },
+        { id: "t07", title: "Smoke and Vinyl", artist: "Blue Hour Trio", genre: "Jazz", price: 1.49, dur: 268, year: 2024, field: 4, motif: 0, seed: 8, trending: true },
+        { id: "t08", title: "Slow Honey", artist: "Sable", genre: "R&B", price: 1.29, dur: 219, year: 2026, field: 2, motif: 0, seed: 6, trending: true },
+        { id: "t09", title: "Nocturne in Rain", artist: "Elena Marchetti", genre: "Classical", price: 1.49, dur: 284, year: 2023, field: 0, motif: 3, seed: 11 },
+        { id: "t10", title: "Basement Tapes", artist: "The Lowtones", genre: "Rock", price: 0.99, dur: 238, year: 2023, field: 1, motif: 3, seed: 2 },
+        { id: "a02", title: "Afterglow Drive", artist: "Midnight Circuit", genre: "Electronic", price: 1.29, dur: 245, year: 2026, field: 0, motif: 0, seed: 14, album: ALBUM.id, no: 2 },
+        { id: "a03", title: "Ultraviolet", artist: "Midnight Circuit", genre: "Electronic", price: 1.29, dur: 198, year: 2026, field: 0, motif: 0, seed: 15, album: ALBUM.id, no: 3 },
+        { id: "a04", title: "Chrome Rain", artist: "Midnight Circuit", genre: "Electronic", price: 1.29, dur: 236, year: 2026, field: 0, motif: 0, seed: 16, album: ALBUM.id, no: 4 },
+        { id: "a05", title: "Night Frequency", artist: "Midnight Circuit", genre: "Electronic", price: 1.29, dur: 252, year: 2026, field: 0, motif: 0, seed: 17, album: ALBUM.id, no: 5 },
+        { id: "a06", title: "Pulse Meridian", artist: "Midnight Circuit", genre: "Electronic", price: 1.29, dur: 217, year: 2026, field: 0, motif: 0, seed: 18, album: ALBUM.id, no: 6 },
+        { id: "a07", title: "Signal Fade", artist: "Midnight Circuit", genre: "Electronic", price: 1.29, dur: 228, year: 2026, field: 0, motif: 0, seed: 19, album: ALBUM.id, no: 7 },
+        { id: "a08", title: "Halcyon Grid", artist: "Midnight Circuit", genre: "Electronic", price: 1.29, dur: 241, year: 2026, field: 0, motif: 0, seed: 20, album: ALBUM.id, no: 8 },
+        { id: "a09", title: "Laser Meadow", artist: "Midnight Circuit", genre: "Electronic", price: 1.29, dur: 209, year: 2026, field: 0, motif: 0, seed: 21, album: ALBUM.id, no: 9 },
+        { id: "a10", title: "Vector Bloom", artist: "Midnight Circuit", genre: "Electronic", price: 1.29, dur: 234, year: 2026, field: 0, motif: 0, seed: 22, album: ALBUM.id, no: 10 },
+        { id: "a11", title: "Static Bloom", artist: "Midnight Circuit", genre: "Electronic", price: 1.29, dur: 248, year: 2026, field: 0, motif: 0, seed: 23, album: ALBUM.id, no: 11 },
+        { id: "a12", title: "Midnight Circuit", artist: "Midnight Circuit", genre: "Electronic", price: 1.29, dur: 260, year: 2026, field: 0, motif: 0, seed: 24, album: ALBUM.id, no: 12 }
+      ];
+      const byId = id => TRACKS.find(t => t.id === id);
+      const albumTracks = () => TRACKS.filter(t => t.album === ALBUM.id).sort((a, b) => a.no - b.no);
+      const GENRES = ["All", "Pop", "Hip-Hop", "Electronic", "R&B", "Jazz", "Rock", "Classical", "Lo-Fi"];
+      const FORMATS = [
+        { id: "FLAC", name: "FLAC", note: "Lossless", desc: "Studio quality, recommended" },
+        { id: "MP3", name: "MP3 · 320 kbps", note: "", desc: "Small file, great sound" },
+        { id: "WAV", name: "WAV", note: "", desc: "Uncompressed" }
+      ];
+      const money = n => "$" + n.toFixed(2);
+      const fmtDur = s => Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+
+      /* ============ cover art: flat duotone, neutral fields + accent marks ============ */
+      const FIELDS = ["#2a2a38", "#22222e", "#30303e", "#282832", "#1e1e29"];
+      const FG = ["#ffffff", "#ffffff", "#ffffff", "#ffffff", "#ffffff"];
+      function eqBars(x, y, w, color, alpha) {
+        const hs = [0.5, 0.9, 0.65, 1, 0.75, 0.55, 0.85, 0.6], bw = w / hs.length, out = [];
+        hs.forEach((h, i) => { const bh = 56 * h; out.push('<rect x="' + (x + i * bw + 1.5) + '" y="' + (y + 56 - bh) + '" width="' + (bw - 3) + '" height="' + bh + '" rx="2.5" fill="' + color + '" opacity="' + alpha + '"/>'); });
+        return out.join("");
+      }
+      function coverSVG(t) {
+        const bg = FIELDS[t.field], fg = FG[t.field];
+        let art = "";
+        if (t.motif === 0) {
+          art = '<circle cx="146" cy="54" r="58" fill="' + fg + '" opacity="0.16"/><circle cx="146" cy="54" r="36" fill="' + fg + '" opacity="0.14"/>' + eqBars(28, 118, 144, fg, 0.92);
+        } else if (t.motif === 1) {
+          art = '<circle cx="100" cy="92" r="30" fill="none" stroke="' + fg + '" stroke-width="5" opacity="0.55"/><circle cx="100" cy="92" r="52" fill="none" stroke="' + fg + '" stroke-width="5" opacity="0.4"/><circle cx="100" cy="92" r="74" fill="none" stroke="' + fg + '" stroke-width="5" opacity="0.25"/><polygon points="124,52 152,92 98,92" fill="' + fg + '"/><circle cx="52" cy="150" r="34" fill="' + fg + '" opacity="0.16"/>';
+        } else if (t.motif === 2) {
+          art = '<circle cx="148" cy="48" r="26" fill="' + fg + '" opacity="0.95"/><rect x="24" y="110" width="152" height="18" rx="9" fill="' + fg + '" opacity="0.88"/><rect x="44" y="140" width="112" height="13" rx="6.5" fill="' + fg + '" opacity="0.5"/>';
+        } else {
+          art = '<polygon points="0,200 110,0 200,0 90,200" fill="' + fg + '" opacity="0.14"/>' + eqBars(32, 116, 136, fg, 0.92);
+        }
+        return '<svg viewBox="0 0 200 200" role="img" aria-label="Cover art for ' + t.title + '"><rect width="200" height="200" fill="' + bg + '"/>' + art + "</svg>";
+      }
+      const albumCoverSVG = '<svg viewBox="0 0 200 200" role="img" aria-label="Cover art for Neon Horizons"><rect width="200" height="200" fill="#2a2a38"/><circle cx="146" cy="54" r="58" fill="#ffffff" opacity="0.16"/><circle cx="146" cy="54" r="36" fill="#ffffff" opacity="0.14"/>' + eqBars(28, 118, 144, "#ffffff", 0.92) + "</svg>";
+
+      /* ================= audio: preview synth + WAV render ================= */
+      let AC = null, master = null;
+      function audio() {
+        if (!AC) {
+          AC = new (window.AudioContext || window.webkitAudioContext)();
+          master = AC.createGain(); master.gain.value = 0.5; master.connect(AC.destination);
+        }
+        if (AC.state === "suspended") AC.resume();
+        return AC;
+      }
+      function params(t) { return { bpm: 96 + (t.seed * 13) % 36, root: 43 + (t.seed % 6) }; }
+      const CHORDS = [0, -4, 3, -2], ARP = [0, 4, 7, 12, 7, 4];
+      const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+      function scheduleInto(ctx, dest, t, totalDur, startAt) {
+        const p = params(t), spb = 60 / p.bpm, bar = spb * 4, chordLen = bar * 2, seqLen = chordLen * CHORDS.length;
+        for (let start = startAt; start < startAt + totalDur; start += seqLen) {
+          CHORDS.forEach((off, ci) => {
+            const cs = start + ci * chordLen, root = p.root + off;
+            [0, 4, 7].forEach(iv => {
+              const o = ctx.createOscillator(), g = ctx.createGain();
+              o.type = "sine"; o.frequency.value = mtof(root + 12 + iv);
+              g.gain.setValueAtTime(0, cs); g.gain.linearRampToValueAtTime(0.026, cs + 0.4);
+              g.gain.setValueAtTime(0.026, cs + chordLen - 0.4); g.gain.linearRampToValueAtTime(0, cs + chordLen);
+              o.connect(g); g.connect(dest); o.start(cs); o.stop(cs + chordLen + 0.05);
+            });
+            for (let b = 0; b < 8; b++) {
+              const bt = cs + b * spb, o = ctx.createOscillator(), g = ctx.createGain();
+              o.type = "triangle"; o.frequency.value = mtof(root);
+              g.gain.setValueAtTime(0, bt); g.gain.linearRampToValueAtTime(0.15, bt + 0.02);
+              g.gain.exponentialRampToValueAtTime(0.001, bt + spb * 0.9);
+              o.connect(g); g.connect(dest); o.start(bt); o.stop(bt + spb);
+            }
+            for (let s = 0; s < 16; s++) {
+              if ((s * 7 + t.seed) % 5 === 4) continue;
+              const at = cs + s * (spb / 2), o = ctx.createOscillator(), g = ctx.createGain();
+              o.type = "sine"; o.frequency.value = mtof(root + 24 + ARP[(s + t.seed) % ARP.length]);
+              g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(0.065, at + 0.01);
+              g.gain.exponentialRampToValueAtTime(0.001, at + 0.28);
+              o.connect(g); g.connect(dest); o.start(at); o.stop(at + 0.3);
+            }
+          });
+        }
+      }
+      const PREVIEW_LEN = 30;
+      let playing = null; // { track, gain, startAt, raf }
+      function stopPreview() {
+        if (!playing) return;
+        cancelAnimationFrame(playing.raf);
+        try { playing.gain.gain.setTargetAtTime(0, AC.currentTime, 0.03); const g = playing.gain; setTimeout(() => { try { g.disconnect(); } catch (e) {} }, 150); } catch (e) {}
+        playing = null;
+        syncPlayButtons();
+        document.getElementById("player").classList.remove("show");
+      }
+      function playPreview(track) {
+        const ctx = audio();
+        if (playing && playing.track.id === track.id) { stopPreview(); return; }
+        stopPreview();
+        const g = ctx.createGain(); g.gain.value = 0.9; g.connect(master);
+        const startAt = ctx.currentTime + 0.06;
+        scheduleInto(ctx, g, track, PREVIEW_LEN, startAt);
+        playing = { track, gain: g, startAt, raf: 0 };
+        document.getElementById("player-title").textContent = track.title;
+        document.getElementById("player-artist").textContent = track.artist;
+        document.getElementById("player-cover").innerHTML = coverSVG(track);
+        document.getElementById("player").classList.add("show");
+        setPauseIcon(true);
+        syncPlayButtons();
+        const tick = () => {
+          if (!playing) return;
+          const el = Math.max(0, AC.currentTime - playing.startAt);
+          document.getElementById("player-cur").textContent = fmtDur(Math.min(PREVIEW_LEN, Math.floor(el)));
+          document.getElementById("player-fill").style.width = Math.min(100, el / PREVIEW_LEN * 100) + "%";
+          if (el >= PREVIEW_LEN) { stopPreview(); return; }
+          playing.raf = requestAnimationFrame(tick);
+        };
+        tick();
+      }
+      function togglePlayerPause() {
+        if (!playing) return;
+        if (AC.state === "running") { AC.suspend(); setPauseIcon(false); }
+        else { AC.resume(); setPauseIcon(true); }
+      }
+      function setPauseIcon(isPlaying) {
+        document.getElementById("player-toggle-icon").innerHTML = isPlaying
+          ? '<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>'
+          : '<path d="M8 5.5v13l11-6.5z"/>';
+        document.getElementById("player-toggle").setAttribute("aria-label", isPlaying ? "Pause preview" : "Resume preview");
+      }
+      function syncPlayButtons() {
+        document.querySelectorAll("[data-play]").forEach(btn => {
+          const active = playing && playing.track.id === btn.getAttribute("data-play");
+          btn.classList.toggle("playing", !!active);
+          btn.setAttribute("aria-label", active ? "Stop preview" : "Play preview");
+          const svg = btn.querySelector("svg");
+          if (svg) svg.innerHTML = active ? '<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>' : '<path d="M8 5.5v13l11-6.5z"/>';
+        });
+        const detailBtn = document.getElementById("detail-preview");
+        if (detailBtn && detailTrack) {
+          const active = playing && playing.track.id === detailTrack.id;
+          detailBtn.lastChild.textContent = active ? " Stop" : " Preview";
+        }
+      }
+      function encodeWav(buffer) {
+        const ch = buffer.getChannelData(0), sr = buffer.sampleRate, len = ch.length;
+        const out = new DataView(new ArrayBuffer(44 + len * 2));
+        const wstr = (off, s) => { for (let i = 0; i < s.length; i++) out.setUint8(off + i, s.charCodeAt(i)); };
+        wstr(0, "RIFF"); out.setUint32(4, 36 + len * 2, true); wstr(8, "WAVE"); wstr(12, "fmt ");
+        out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, 1, true);
+        out.setUint32(24, sr, true); out.setUint32(28, sr * 2, true); out.setUint16(32, 2, true); out.setUint16(34, 16, true);
+        wstr(36, "data"); out.setUint32(40, len * 2, true);
+        for (let i = 0; i < len; i++) { const v = Math.max(-1, Math.min(1, ch[i])); out.setInt16(44 + i * 2, v * 0x7fff, true); }
+        return new Blob([out.buffer], { type: "audio/wav" });
+      }
+      async function downloadTrack(track, btn) {
+        const rec = owned.get(track.id);
+        if (!rec || rec.left <= 0) return;
+        const label = btn.innerHTML;
+        btn.disabled = true; btn.textContent = "Preparing file";
+        try {
+          const sr = 22050, off = new OfflineAudioContext(1, Math.ceil(track.dur * sr), sr);
+          const g = off.createGain(); g.gain.value = 0.6; g.connect(off.destination);
+          scheduleInto(off, g, track, track.dur, 0);
+          const buf = await off.startRendering();
+          const url = URL.createObjectURL(encodeWav(buf));
+          const a = document.createElement("a");
+          a.href = url; a.download = track.artist + " - " + track.title + ".wav";
+          document.body.appendChild(a); a.click(); a.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 4000);
+          rec.left -= 1;
+          renderLibrary();
+          toast("Download started — " + track.title);
+        } catch (e) {
+          btn.disabled = false; btn.innerHTML = label;
+          toast("The file could not be prepared. Try again.");
+        }
+      }
+    </script>
+
+    <script>
+      "use strict";
+      /* ================= state ================= */
+      const state = { query: "", genre: "All", showAll: false };
+      const cart = [];              // { kind: "track"|"album", id }
+      const owned = new Map();      // trackId -> { left, expires, fmt }
+      let user = null;
+      let checkoutFmt = "FLAC";
+      let detailTrack = null, detailFmt = "FLAC";
+      const $ = s => document.querySelector(s);
+
+      const ICON_PLAY = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>';
+      const ICON_DL = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M6.5 10.5L12 16l5.5-5.5"/><path d="M4 20h16"/></svg>';
+      const ICON_TRASH = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V5h6v2"/><path d="M6 7l1 13h10l1-13"/><path d="M10 11v6M14 11v6"/></svg>';
+      const ICON_LOCK = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+
+      function toast(msg, actionLabel, actionFn) {
+        const el = $("#toast");
+        el.innerHTML = "";
+        const span = document.createElement("span"); span.textContent = msg; el.appendChild(span);
+        if (actionLabel) {
+          const b = document.createElement("button"); b.textContent = actionLabel;
+          b.addEventListener("click", () => { el.classList.remove("show"); if (actionFn) actionFn(); });
+          el.appendChild(b);
+        }
+        el.classList.add("show");
+        clearTimeout(toast._t);
+        toast._t = setTimeout(() => el.classList.remove("show"), 3600);
+      }
+
+      /* ================= catalogue ================= */
+      function inCart(id) { return cart.some(i => i.id === id) || (id !== ALBUM.id && cart.some(i => i.kind === "album") && byId(id) && byId(id).album === ALBUM.id); }
+      function isOwned(id) { return owned.has(id); }
+      function addState(id) {
+        if (isOwned(id)) return { cls: "owned", label: "In library", disabled: true };
+        if (inCart(id)) return { cls: "in-cart", label: "In cart", disabled: false };
+        return { cls: "", label: "Add", disabled: false };
+      }
+      function renderChips() {
+        $("#genre-chips").innerHTML = GENRES.map(g =>
+          '<button class="chip' + (state.genre === g && !state.showAll ? " active" : "") + '" data-genre="' + g + '">' + g + "</button>").join("");
+      }
+      function currentList() {
+        let list;
+        if (state.query || state.genre !== "All") list = TRACKS.slice();
+        else if (state.showAll) list = TRACKS.slice();
+        else list = TRACKS.filter(t => t.trending);
+        if (state.genre !== "All") list = list.filter(t => t.genre === state.genre);
+        if (state.query) {
+          const q = state.query.toLowerCase();
+          list = list.filter(t => (t.title + " " + t.artist + " " + (t.album ? ALBUM.title : "")).toLowerCase().includes(q));
+        }
+        return list;
+      }
+      function renderGrid() {
+        const list = currentList();
+        const title = $("#grid-title");
+        title.textContent = state.query ? "Results for \u201C" + state.query + "\u201D"
+          : state.genre !== "All" ? state.genre
+          : state.showAll ? "All tracks" : "Trending now";
+        $("#see-all").style.display = (!state.showAll && !state.query && state.genre === "All") ? "" : "none";
+        const grid = $("#track-grid"), empty = $("#grid-empty");
+        if (!list.length) {
+          grid.innerHTML = ""; grid.style.display = "none";
+          const charts = albumTracks().slice(0, 5);
+          empty.innerHTML = '<div class="empty-box"><h3>No results for \u201C' + escapeHtml(state.query) + '\u201D</h3>' +
+            "<p>Try another title or artist — or start with the top charts this week.</p>" +
+            '<div class="chart-list">' + charts.map((t, i) =>
+              '<div class="chart-row"><span class="chart-rank tnum">' + (i + 1) + '</span>' +
+              '<button class="play-btn" data-play="' + t.id + '" aria-label="Play preview">' + ICON_PLAY + "</button>" +
+              '<span class="mini-title">' + t.title + '</span><span class="mini-dur tnum">' + fmtDur(t.dur) + '</span>' +
+              '<span class="mini-price tnum">' + money(t.price) + "</span></div>").join("") + "</div></div>";
+        } else {
+          empty.innerHTML = ""; grid.style.display = "";
+          grid.innerHTML = list.map(t => {
+            const a = addState(t.id);
+            return '<article class="track-card"><div class="card-top">' +
+              '<div class="cover" data-detail="' + t.id + '">' + coverSVG(t) +
+              '<button class="cover-play" data-play="' + t.id + '" aria-label="Play preview">' + ICON_PLAY + "</button></div>" +
+              '<h3 class="card-title"><button data-detail="' + t.id + '" style="font:inherit;text-align:left">' + t.title + "</button></h3>" +
+              '<p class="card-artist">' + t.artist + "</p>" +
+              '<p class="card-meta tnum">' + t.genre + " · " + fmtDur(t.dur) + " · " + t.year + "</p></div>" +
+              '<div class="card-foot"><span class="card-price tnum">' + money(t.price) + "</span>" +
+              '<button class="add-btn ' + a.cls + '" data-add="' + t.id + '"' + (a.disabled ? " disabled" : "") + ">" + a.label + "</button></div></article>";
+          }).join("");
+        }
+        syncPlayButtons();
+      }
+      function escapeHtml(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+
+      function miniRow(t, withNum) {
+        const a = addState(t.id);
+        return '<div class="mini-row">' +
+          '<button class="play-btn" data-play="' + t.id + '" aria-label="Play preview">' + ICON_PLAY + "</button>" +
+          (withNum ? '<span class="mini-num tnum">' + String(t.no).padStart(2, "0") + "</span>" : "") +
+          '<span class="mini-title"><button data-detail="' + t.id + '" style="font:inherit;text-align:left">' + t.title + "</button></span>" +
+          '<span class="mini-dur tnum">' + fmtDur(t.dur) + "</span>" +
+          '<span class="mini-price tnum">' + money(t.price) + "</span>" +
+          '<button class="row-add ' + (inCart(t.id) || isOwned(t.id) ? "in-cart" : "") + '" data-add="' + t.id + '">' + (isOwned(t.id) ? "Owned" : inCart(t.id) ? "In cart" : "Add") + "</button></div>";
+      }
+      function renderAlbum() {
+        $("#album-cover").innerHTML = albumCoverSVG;
+        $("#feature-cover").innerHTML = albumCoverSVG;
+        $("#feature-tracks").innerHTML = albumTracks().slice(0, 3).map(t => miniRow(t, false)).join("");
+        $("#album-tracks").innerHTML = albumTracks().map(t => miniRow(t, true)).join("");
+        syncPlayButtons();
+      }
+
+      /* ================= cart + checkout ================= */
+      function cartItems() {
+        return cart.map(i => i.kind === "album"
+          ? { key: ALBUM.id, title: ALBUM.title + " (album)", artist: ALBUM.artist, price: ALBUM.price, cover: albumCoverSVG, kind: "album" }
+          : (() => { const t = byId(i.id); return { key: t.id, title: t.title, artist: t.artist, price: t.price, cover: coverSVG(t), kind: "track" }; })());
+      }
+      function cartTotal() { return cartItems().reduce((s, i) => s + i.price, 0); }
+      function updateCartCount() { $("#cart-count").textContent = cart.length ? String(cart.length) : ""; }
+      function addToCart(kind, id) {
+        const key = kind === "album" ? ALBUM.id : id;
+        if (kind === "album") {
+          for (let i = cart.length - 1; i >= 0; i--) if (cart[i].kind === "track" && byId(cart[i].id).album === ALBUM.id) cart.splice(i, 1);
+          if (!cart.some(i => i.kind === "album")) cart.push({ kind: "album", id: ALBUM.id });
+          toast("Album added to cart — Neon Horizons", "View cart", openCart);
+        } else {
+          const t = byId(id);
+          if (!t || isOwned(id) || inCart(id)) { if (inCart(id)) openCart(); return; }
+          cart.push({ kind: "track", id });
+          toast("Added to cart — " + t.title, "View cart", openCart);
+        }
+        updateCartCount(); renderGrid(); renderAlbum(); renderDrawerCart();
+      }
+      function removeFromCart(key) {
+        const idx = cart.findIndex(i => (i.kind === "album" ? ALBUM.id : i.id) === key);
+        if (idx >= 0) cart.splice(idx, 1);
+        updateCartCount(); renderGrid(); renderAlbum(); renderDrawerCart();
+      }
+      const ICON_X = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+      function drawerShell() {
+        $("#drawer").innerHTML =
+          '<div class="drawer-head"><h2 id="drawer-title">Your cart</h2>' +
+          '<button class="icon-btn" id="drawer-close" aria-label="Close cart">' + ICON_X + "</button></div>" +
+          '<div class="drawer-body" id="drawer-body"></div><div class="drawer-foot" id="drawer-foot"></div>';
+      }
+      function openCart() {
+        if (!$("#drawer-body")) drawerShell();
+        renderDrawerCart();
+        $("#drawer").classList.add("show"); $("#scrim").classList.add("show");
+      }
+      function closeCart() {
+        const d = $("#drawer");
+        d.classList.remove("show"); $("#scrim").classList.remove("show");
+        setTimeout(() => { if (!d.classList.contains("show")) d.innerHTML = ""; }, 280);
+      }
+      function renderDrawerCart() {
+        if (!$("#drawer-body")) return;
+        $("#drawer-title").textContent = "Your cart";
+        const body = $("#drawer-body"), foot = $("#drawer-foot");
+        const items = cartItems();
+        if (!items.length) {
+          body.innerHTML = '<div class="drawer-empty">Your cart is empty.<br/>Previews are free — start with Trending now.</div>';
+          foot.innerHTML = '<button class="btn btn-primary btn-block" id="drawer-browse">Browse trending</button>';
+          $("#drawer-browse").addEventListener("click", () => { closeCart(); document.getElementById("trending").scrollIntoView({ behavior: "smooth" }); });
+          return;
+        }
+        body.innerHTML = items.map(i =>
+          '<div class="cart-row"><div class="cart-cover">' + i.cover + '</div>' +
+          '<div class="cart-main"><p class="cart-title">' + i.title + '</p><p class="cart-artist">' + i.artist + "</p></div>" +
+          '<span class="cart-price tnum">' + money(i.price) + "</span>" +
+          '<button class="remove-btn" data-remove="' + i.key + '" aria-label="Remove ' + i.title + ' from cart">' + ICON_TRASH + "</button></div>").join("") +
+          '<div class="field"><label>Download format</label><div class="seg" id="fmt-seg">' +
+          FORMATS.map(f => '<button data-fmt="' + f.id + '"' + (checkoutFmt === f.id ? ' class="active"' : "") + ">" + f.id + "</button>").join("") + "</div>" +
+          '<p class="hint">Every purchase includes all three formats. This sets your default.</p></div>';
+        foot.innerHTML =
+          '<div class="sum-row"><span>Subtotal</span><span class="tnum">' + money(cartTotal()) + '</span></div>' +
+          '<div class="sum-row total"><span>Total</span><span class="tnum">' + money(cartTotal()) + '</span></div>' +
+          '<button class="btn btn-primary btn-block" id="to-checkout">Checkout</button>';
+        body.querySelectorAll("[data-remove]").forEach(b => b.addEventListener("click", () => removeFromCart(b.getAttribute("data-remove"))));
+        body.querySelectorAll("[data-fmt]").forEach(b => b.addEventListener("click", () => { checkoutFmt = b.getAttribute("data-fmt"); renderDrawerCart(); }));
+        $("#to-checkout").addEventListener("click", renderCheckout);
+      }
+      function fieldHtml(id, label, attrs, hint) {
+        return '<div class="field" id="f-' + id + '"><label for="' + id + '">' + label + "</label>" +
+          '<input id="' + id + '" ' + attrs + ' /><p class="err"></p>' + (hint ? '<p class="hint">' + hint + "</p>" : "") + "</div>";
+      }
+      function setErr(id, msg) {
+        const f = $("#f-" + id); if (!f) return;
+        f.classList.add("invalid"); f.querySelector(".err").textContent = msg;
+      }
+      function renderCheckout() {
+        $("#drawer-title").textContent = "Checkout";
+        const items = cartItems();
+        $("#drawer-body").innerHTML =
+          '<div style="padding-top:8px">' + items.map(i =>
+            '<div class="sum-row" style="padding:4px 0"><span>' + i.title + " — " + i.artist + '</span><span class="tnum">' + money(i.price) + "</span></div>").join("") + "</div>" +
+          fieldHtml("co-name", "Name on card", 'type="text" autocomplete="cc-name" placeholder="Full name"') +
+          fieldHtml("co-card", "Card number", 'type="text" inputmode="numeric" autocomplete="cc-number" placeholder="1234 5678 9012 3456"') +
+          '<div class="field-row">' +
+          fieldHtml("co-exp", "Expiry", 'type="text" inputmode="numeric" autocomplete="cc-exp" placeholder="MM / YY"') +
+          fieldHtml("co-cvc", "CVC", 'type="text" inputmode="numeric" autocomplete="cc-csc" placeholder="123"') + "</div>" +
+          '<p class="secure-note">' + ICON_LOCK + " Encrypted and secure checkout. This demo does not process real payments.</p>";
+        $("#drawer-foot").innerHTML =
+          '<div class="sum-row total"><span>Total</span><span class="tnum">' + money(cartTotal()) + '</span></div>' +
+          '<button class="btn btn-primary btn-block" id="pay-btn">Pay ' + money(cartTotal()) + "</button>" +
+          '<button class="btn btn-ghost btn-block" id="back-cart">Back to cart</button>';
+        $("#back-cart").addEventListener("click", renderDrawerCart);
+        const card = $("#co-card"), exp = $("#co-exp"), cvc = $("#co-cvc");
+        card.addEventListener("input", () => { card.value = card.value.replace(/\D/g, "").slice(0, 16).replace(/(.{4})/g, "$1 ").trim(); });
+        exp.addEventListener("input", () => { let v = exp.value.replace(/\D/g, "").slice(0, 4); exp.value = v.length > 2 ? v.slice(0, 2) + " / " + v.slice(2) : v; });
+        cvc.addEventListener("input", () => { cvc.value = cvc.value.replace(/\D/g, "").slice(0, 4); });
+        $("#pay-btn").addEventListener("click", submitPayment);
+      }
+      function submitPayment() {
+        let ok = true;
+        document.querySelectorAll("#drawer-body .field").forEach(f => f.classList.remove("invalid"));
+        if (!$("#co-name").value.trim()) { setErr("co-name", "Enter the name on the card"); ok = false; }
+        if ($("#co-card").value.replace(/\s/g, "").length < 16) { setErr("co-card", "Enter the 16-digit card number"); ok = false; }
+        const exp = $("#co-exp").value.replace(/\D/g, "");
+        const mm = parseInt(exp.slice(0, 2), 10);
+        if (exp.length < 4 || !(mm >= 1 && mm <= 12)) { setErr("co-exp", "Enter a valid expiry date"); ok = false; }
+        if ($("#co-cvc").value.length < 3) { setErr("co-cvc", "Enter the 3-digit CVC"); ok = false; }
+        if (!ok) return;
+        const btn = $("#pay-btn");
+        btn.disabled = true; btn.textContent = "Processing";
+        setTimeout(() => completeOrder(), 700);
+      }
+      function completeOrder() {
+        const items = cartItems();
+        const expires = new Date(Date.now() + 30 * 24 * 3600 * 1000);
+        const expStr = expires.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+        const boughtIds = [];
+        cart.forEach(i => {
+          if (i.kind === "album") albumTracks().forEach(t => boughtIds.push(t.id));
+          else boughtIds.push(i.id);
+        });
+        boughtIds.forEach(id => owned.set(id, { left: 5, expires: expStr, fmt: checkoutFmt }));
+        const orderNo = "TD-" + Math.floor(100000 + Math.random() * 900000);
+        cart.length = 0; updateCartCount(); renderGrid(); renderAlbum(); renderLibrary();
+        $("#drawer-title").textContent = "Order complete";
+        $("#drawer-body").innerHTML =
+          '<div class="success-mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg></div>' +
+          '<p class="success-title">Payment confirmed</p>' +
+          '<p class="success-sub">Your files are ready in your library.</p>' +
+          '<p class="order-meta tnum">Order ' + orderNo + " · " + items.length + (items.length === 1 ? " item" : " items") + " · " + money(items.reduce((s, i) => s + i.price, 0)) + "</p>" +
+          '<div style="margin-top:24px">' + boughtIds.map(id => { const t = byId(id); return miniRowLib(t); }).join("") + "</div>";
+        $("#drawer-foot").innerHTML =
+          '<button class="btn btn-primary btn-block" id="go-library">Go to my library</button>' +
+          '<button class="btn btn-ghost btn-block" id="keep-browsing">Keep browsing</button>';
+        $("#drawer-body").querySelectorAll("[data-dl]").forEach(b => b.addEventListener("click", () => downloadTrack(byId(b.getAttribute("data-dl")), b)));
+        $("#go-library").addEventListener("click", () => { closeCart(); document.getElementById("library").scrollIntoView({ behavior: "smooth" }); });
+        $("#keep-browsing").addEventListener("click", closeCart);
+      }
+      function miniRowLib(t) {
+        const rec = owned.get(t.id);
+        return '<div class="mini-row"><div class="cart-cover">' + coverSVG(t) + '</div>' +
+          '<span class="mini-title">' + t.title + '</span>' +
+          '<button class="add-btn" data-dl="' + t.id + '"' + (rec && rec.left > 0 ? "" : " disabled") + ">" + ICON_DL + " Download</button></div>";
+      }
+
+      /* ================= library ================= */
+      function renderLibrary() {
+        const body = $("#library-body");
+        if (!owned.size) {
+          body.innerHTML = '<div class="empty-box"><h3>Nothing here yet</h3><p>Tracks and albums you buy will appear here, ready to download in FLAC, MP3 or WAV.</p>' +
+            '<div style="margin-top:20px"><a class="btn btn-ghost" href="#trending">Browse trending</a></div></div>';
+          return;
+        }
+        body.innerHTML = Array.from(owned.keys()).map(id => {
+          const t = byId(id), rec = owned.get(id);
+          return '<div class="lib-row"><div class="lib-cover">' + coverSVG(t) + '</div>' +
+            '<div class="lib-main"><p class="lib-title">' + t.title + '</p>' +
+            '<p class="lib-meta tnum">' + t.artist + " · " + (rec.left > 0 ? rec.left + " downloads left · link expires " + rec.expires : "Download limit reached") + "</p></div>" +
+            '<div class="lib-actions">' +
+            '<select class="fmt-select" data-fmtsel="' + id + '" aria-label="Download format for ' + t.title + '">' +
+            FORMATS.map(f => '<option value="' + f.id + '"' + (rec.fmt === f.id ? " selected" : "") + ">" + f.id + "</option>").join("") + "</select>" +
+            '<button class="add-btn" data-dl="' + id + '"' + (rec.left > 0 ? "" : " disabled") + ">" + ICON_DL + " Download</button></div></div>";
+        }).join("");
+        body.querySelectorAll("[data-dl]").forEach(b => b.addEventListener("click", () => downloadTrack(byId(b.getAttribute("data-dl")), b)));
+        body.querySelectorAll("[data-fmtsel]").forEach(s => s.addEventListener("change", () => { owned.get(s.getAttribute("data-fmtsel")).fmt = s.value; }));
+      }
+
+      /* ================= detail modal ================= */
+      function openDetail(t) {
+        detailTrack = t; detailFmt = checkoutFmt;
+        $("#detail-cover").innerHTML = coverSVG(t);
+        $("#detail-kind").textContent = t.album ? "Track · from the album Neon Horizons" : "Track";
+        $("#detail-title").textContent = t.title;
+        $("#detail-artist").textContent = t.artist;
+        $("#detail-genre").textContent = t.genre;
+        $("#detail-dur").textContent = fmtDur(t.dur);
+        $("#detail-year").textContent = t.year;
+        renderDetailFormats(); renderDetailAdd();
+        $("#detail-modal").classList.add("show");
+        syncPlayButtons();
+      }
+      function renderDetailFormats() {
+        $("#detail-formats").innerHTML = FORMATS.map(f =>
+          '<label class="fmt-row' + (detailFmt === f.id ? " selected" : "") + '">' +
+          '<input type="radio" name="fmt" value="' + f.id + '"' + (detailFmt === f.id ? " checked" : "") + " />" +
+          '<span><span class="fmt-name">' + f.name + '</span><br/><span class="fmt-note">' + f.desc + "</span></span>" +
+          (f.note ? '<span class="fmt-tag">' + f.note + "</span>" : "") + "</label>").join("");
+        $("#detail-formats").querySelectorAll("input").forEach(r => r.addEventListener("change", () => { detailFmt = r.value; renderDetailFormats(); }));
+      }
+      function renderDetailAdd() {
+        const btn = $("#detail-add"), a = addState(detailTrack.id);
+        btn.textContent = isOwned(detailTrack.id) ? "In your library" : inCart(detailTrack.id) ? "In cart — view" : "Add to cart — " + money(detailTrack.price);
+        btn.disabled = isOwned(detailTrack.id);
+      }
+      function closeModals() { document.querySelectorAll(".modal").forEach(m => m.classList.remove("show")); }
+
+      /* ================= auth ================= */
+      let authMode = "signin";
+      function renderAuthArea() {
+        const area = $("#auth-area");
+        if (user) {
+          area.innerHTML = '<button class="account-chip" id="account-chip" title="Sign out"><span class="avatar">' + escapeHtml(user.name.charAt(0).toUpperCase()) + "</span>" + escapeHtml(user.name) + "</button>";
+          $("#account-chip").addEventListener("click", () => { user = null; renderAuthArea(); toast("Signed out"); });
+        } else {
+          area.innerHTML = '<button class="btn btn-ghost btn-small" id="signin-btn">Sign in</button>';
+          $("#signin-btn").addEventListener("click", () => openAuth("signin"));
+        }
+      }
+      function openAuth(mode) {
+        authMode = mode;
+        const signup = mode === "signup";
+        $("#auth-title").textContent = signup ? "Create your account" : "Welcome back";
+        $("#auth-sub").textContent = signup ? "Free forever. No credit card needed." : "Sign in to access your library.";
+        $("#auth-name-field").style.display = signup ? "" : "none";
+        $("#auth-pass-hint").style.display = signup ? "" : "none";
+        $("#auth-submit").textContent = signup ? "Create account" : "Sign in";
+        $("#auth-switch-label").textContent = signup ? "Have an account?" : "New to TuneDrop?";
+        $("#auth-switch").textContent = signup ? "Sign in" : "Create account";
+        $("#auth-modal").classList.add("show");
+      }
+
+      /* ================= wiring ================= */
+      document.addEventListener("click", e => {
+        const play = e.target.closest("[data-play]");
+        if (play) { e.stopPropagation(); playPreview(byId(play.getAttribute("data-play"))); return; }
+        const add = e.target.closest("[data-add]");
+        if (add) {
+          const id = add.getAttribute("data-add");
+          if (isOwned(id)) return;
+          if (inCart(id)) { openCart(); return; }
+          addToCart("track", id);
+          if (detailTrack && detailTrack.id === id) renderDetailAdd();
+          return;
+        }
+        const det = e.target.closest("[data-detail]");
+        if (det) { openDetail(byId(det.getAttribute("data-detail"))); return; }
+        const genre = e.target.closest("[data-genre]");
+        if (genre) { state.genre = genre.getAttribute("data-genre"); state.showAll = false; renderChips(); renderGrid(); return; }
+        const close = e.target.closest("[data-close]");
+        if (close) closeModals();
+        if (e.target.closest("#drawer-close")) closeCart();
+      });
+      document.querySelectorAll(".modal").forEach(m => m.addEventListener("click", e => { if (e.target === m) closeModals(); }));
+      document.addEventListener("keydown", e => { if (e.key === "Escape") { closeModals(); closeCart(); } });
+      $("#search").addEventListener("input", e => { state.query = e.target.value.trim(); renderGrid(); });
+      $("#see-all").addEventListener("click", () => { state.showAll = true; renderChips(); renderGrid(); });
+      $("#cart-btn").addEventListener("click", openCart);
+      $("#scrim").addEventListener("click", closeCart);
+      $("#feature-add").addEventListener("click", () => addToCart("album", ALBUM.id));
+      $("#album-add").addEventListener("click", () => addToCart("album", ALBUM.id));
+      $("#player-toggle").addEventListener("click", togglePlayerPause);
+      $("#player-close").addEventListener("click", stopPreview);
+      $("#detail-preview").addEventListener("click", () => { if (detailTrack) playPreview(detailTrack); });
+      $("#detail-add").addEventListener("click", () => {
+        if (!detailTrack) return;
+        if (inCart(detailTrack.id)) { closeModals(); openCart(); return; }
+        addToCart("track", detailTrack.id); renderDetailAdd();
+      });
+      $("#cta-signup").addEventListener("click", () => openAuth("signup"));
+      $("#auth-switch").addEventListener("click", () => openAuth(authMode === "signin" ? "signup" : "signin"));
+      $("#auth-form").addEventListener("submit", e => {
+        e.preventDefault();
+        const email = $("#auth-email").value.trim(), pass = $("#auth-pass").value;
+        const name = $("#auth-name").value.trim();
+        let ok = true;
+        const mark = (id, bad) => { $("#" + id).classList.toggle("invalid", bad); if (bad) ok = false; };
+        mark("auth-email-field", !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email));
+        if (authMode === "signup") {
+          mark("auth-name-field", !name);
+          mark("auth-pass-field", pass.length < 8);
+        } else {
+          mark("auth-pass-field", !pass);
+        }
+        if (!ok) return;
+        user = { name: authMode === "signup" ? name : email.split("@")[0], email };
+        closeModals(); renderAuthArea();
+        toast(authMode === "signup" ? "Account created — welcome to TuneDrop" : "Signed in — welcome back");
+      });
+
+      /* ================= init ================= */
+      renderChips(); renderGrid(); renderAlbum(); renderLibrary(); renderAuthArea(); updateCartCount();
+    </script>
+  </body>
+</html>
