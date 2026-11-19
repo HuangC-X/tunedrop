@@ -4,8 +4,9 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="dark" />
+    <meta name="description" content="Buy DRM-free music downloads in FLAC, WAV and MP3 320 — no subscription, yours to keep forever. Preview every track free. Download now." />
     <link rel="icon" href="data:," />
-    <title>TuneDrop</title>
+    <title>DRM-Free Music Downloads — FLAC, WAV & MP3 | TuneDrop</title>
     <style>
       :root {
         --bg: #0b0b12;
@@ -398,9 +399,9 @@
         <!-- hero -->
         <div class="hero">
           <div class="hero-copy rise">
-            <p class="hero-eyebrow">Digital music store</p>
-            <h1>Download music, own it forever</h1>
-            <p class="hero-sub">Lossless FLAC and MP3 with no subscription and no streaming limits. Pay once, and the files are yours to keep.</p>
+            <p class="hero-eyebrow">Digital music download store</p>
+            <h1>Download DRM-free music, own it forever</h1>
+            <p class="hero-sub">Buy DRM-free music downloads in lossless FLAC, WAV and MP3 320 — no subscription, no streaming limits. Pay once, and the files are yours to keep.</p>
             <div class="hero-actions">
               <a class="btn btn-primary" href="#trending">Browse trending</a>
               <a class="btn btn-ghost" href="#how">How it works</a>
@@ -431,7 +432,7 @@
         <!-- trending + search -->
         <section class="block" id="trending">
           <div class="section-head">
-            <h2 id="grid-title">Trending now</h2>
+            <h2 id="grid-title">Trending downloads</h2>
             <button class="see-all" id="see-all">See all
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
             </button>
@@ -942,7 +943,7 @@
         const title = $("#grid-title");
         title.textContent = state.query ? "Results for \u201C" + state.query + "\u201D"
           : state.genre !== "All" ? state.genre
-          : state.showAll ? "All tracks" : "Trending now";
+          : state.showAll ? "All tracks" : "Trending downloads";
         $("#see-all").style.display = (!state.showAll && !state.query && state.genre === "All") ? "" : "none";
         const grid = $("#track-grid"), empty = $("#grid-empty");
         if (!list.length) {
@@ -1041,7 +1042,7 @@
         const body = $("#drawer-body"), foot = $("#drawer-foot");
         const items = cartItems();
         if (!items.length) {
-          body.innerHTML = '<div class="drawer-empty">Your cart is empty.<br/>Previews are free — start with Trending now.</div>';
+          body.innerHTML = '<div class="drawer-empty">Your cart is empty.<br/>Previews are free — start with Trending downloads.</div>';
           foot.innerHTML = '<button class="btn btn-primary btn-block" id="drawer-browse">Browse trending</button>';
           $("#drawer-browse").addEventListener("click", () => { closeCart(); document.getElementById("trending").scrollIntoView({ behavior: "smooth" }); });
           return;
