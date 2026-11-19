@@ -432,7 +432,7 @@
         <!-- trending + search -->
         <section class="block" id="trending">
           <div class="section-head">
-            <h2 id="grid-title">Trending downloads</h2>
+            <h2 id="grid-title">Trending DRM-free music downloads</h2>
             <button class="see-all" id="see-all">See all
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
             </button>
@@ -943,7 +943,7 @@
         const title = $("#grid-title");
         title.textContent = state.query ? "Results for \u201C" + state.query + "\u201D"
           : state.genre !== "All" ? state.genre
-          : state.showAll ? "All tracks" : "Trending downloads";
+          : state.showAll ? "All tracks" : "Trending DRM-free music downloads";
         $("#see-all").style.display = (!state.showAll && !state.query && state.genre === "All") ? "" : "none";
         const grid = $("#track-grid"), empty = $("#grid-empty");
         if (!list.length) {
