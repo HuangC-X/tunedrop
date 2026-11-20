@@ -385,6 +385,19 @@
         .lib-actions { flex-basis: 100%; justify-content: flex-end; }
       }
     </style>
+    <!-- Yandex.Metrika counter -->
+    <script type="text/javascript">
+        (function(m,e,t,r,i,k,a){
+            m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+            m[i].l=1*new Date();
+            for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+        })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=114398462', 'ym');
+
+        ym(114398462, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+    </script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/114398462" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <!-- /Yandex.Metrika counter -->
   </head>
   <body>
     <header class="site">
@@ -601,6 +614,7 @@
         <div class="footer-base">
           <span>© 2026 TuneDrop. All rights reserved.</span>
           <span>Made for music lovers.</span>
+          <span>Self-written JS counter — visits from this browser: <span id="visitCount">0</span></span>
         </div>
       </div>
     </footer>
@@ -1291,8 +1305,40 @@
         toast(authMode === "signup" ? "Account created — welcome to TuneDrop" : "Signed in — welcome back");
       });
 
+      /* ================= visit counter (hand-written, localStorage) ================= */
+      /* Counts visits in THIS browser only. TuneDrop is a static GitHub Pages site
+         with no server or database, so this cannot count all visitors site-wide —
+         the Yandex Metrika counter (server-side) covers real total traffic. */
+      (function () {
+        var el = document.getElementById("visit-count");
+        if (!el) return;
+        var n = 0;
+        try {
+          n = parseInt(localStorage.getItem("tunedrop-visits"), 10) || 0;
+          n += 1;
+          localStorage.setItem("tunedrop-visits", String(n));
+        } catch (e) { n = 0; }
+        el.textContent = n > 0 ? String(n) : "–";
+      })();
+
       /* ================= init ================= */
       renderChips(); renderGrid(); renderAlbum(); renderLibrary(); renderAuthArea(); updateCartCount();
+    </script>
+    <!-- Self-written JavaScript counter: counts visits from this browser, stored in localStorage -->
+    <script>
+      (function () {
+        var KEY = 'tunedrop_visits';
+        var count = 0;
+        try {
+          count = parseInt(localStorage.getItem(KEY) || '0', 10) || 0;
+          count += 1;
+          localStorage.setItem(KEY, String(count));
+        } catch (e) {
+          count = 1;
+        }
+        var el = document.getElementById('visitCount');
+        if (el) { el.textContent = count; }
+      })();
     </script>
   </body>
 </html>
