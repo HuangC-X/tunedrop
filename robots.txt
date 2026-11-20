@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://huangc-x.github.io/tunedrop/sitemap.xml
