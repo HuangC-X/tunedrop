@@ -21,7 +21,9 @@
       "currenciesAccepted": "USD"
     }
     </script>
-    <link rel="icon" href="data:," />
+    <meta name="theme-color" content="#08090e" />
+    <!-- Site icon: inline SVG matching the header logo, saves one request -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Crect width='28' height='28' rx='8' fill='%23c8ff3d'/%3E%3Cpath d='M9 17.5V10.5l9-2v7' stroke='%23111502' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Ccircle cx='7.5' cy='18' r='2.2' fill='%23111502'/%3E%3Ccircle cx='16.5' cy='16' r='2.2' fill='%23111502'/%3E%3C/svg%3E" />
     <title>DRM-Free Music Downloads — FLAC, WAV & MP3 | TuneDrop</title>
     <style>
       :root {
@@ -169,7 +171,6 @@
       .feature-meta { font-size: 12px; color: var(--text-3); margin-top: 8px; }
       .price-row { display: flex; align-items: baseline; gap: 10px; margin-top: 14px; }
       .price-now { font-size: 24px; font-weight: 600; color: var(--text); }
-      .price-was { font-size: 14px; color: var(--text-3); text-decoration: line-through; }
       .feature-tracks { margin-top: 18px; border-top: 1px solid var(--line); }
 
       .mini-row { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--line); }
@@ -634,10 +635,9 @@
               <div class="feature-kicker">Featured EP</div>
               <div class="feature-title">Subzero Telemetry</div>
               <div class="feature-artist">by <button type="button" class="artist-link" data-artist="Kaelen Voss">Kaelen Voss</button></div>
-              <div class="feature-meta">4 tracks · 24-bit FLAC · 126–130 BPM</div>
+              <div class="feature-meta" id="hero-ep-meta">4 tracks · 24-bit FLAC · 126–130 BPM</div>
               <div class="price-row">
-                <span class="price-now tnum">$5.99</span>
-                <span class="price-was tnum">$7.96</span>
+                <span class="price-now tnum" id="hero-ep-price">$5.99</span>
               </div>
             </div>
           </div>
@@ -682,7 +682,7 @@
             <div class="album-info">
               <h3>Neon Cartography</h3>
               <div class="album-artist">by <button type="button" class="artist-link" data-artist="Nadia Lin">Nadia Lin</button></div>
-              <div class="album-meta">4 tracks · 21:08 total · Released Nov 2026 · 24-bit/48kHz</div>
+              <div class="album-meta" id="album-meta">4 tracks · 21:08 total · Released Nov 2026 · 24-bit/48kHz</div>
               <div class="album-cta">
                 <button type="button" class="btn btn-primary" id="album-add-all">Buy Album · $5.49</button>
                 <button type="button" class="btn btn-ghost" id="album-chat-btn">Chat with Nadia Lin</button>
@@ -1084,17 +1084,20 @@
           try { localStorage.setItem("tunedrop_favs", JSON.stringify([...state.favorites])); } catch (e) {}
         }
 
+        // Cover art: unique gradient id per render so repeated covers never collide
+        let coverUid = 0;
         function coverSVG(palette, seed = 1) {
           const [c1, c2, c3] = palette;
+          const uid = `cg${++coverUid}`;
           const r = 24 + (seed % 5) * 6;
           return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <defs>
-              <linearGradient id="g${seed}" x1="0" y1="0" x2="1" y2="1">
+              <linearGradient id="${uid}" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0%" stop-color="${c2}"/>
                 <stop offset="100%" stop-color="#0b0d14"/>
               </linearGradient>
             </defs>
-            <rect width="120" height="120" fill="url(#g${seed})"/>
+            <rect width="120" height="120" fill="url(#${uid})"/>
             <circle cx="${36 + (seed * 11) % 45}" cy="${38 + (seed * 7) % 40}" r="${r}" fill="${c1}" fill-opacity="0.22"/>
             <circle cx="60" cy="60" r="28" fill="none" stroke="${c3}" stroke-opacity="0.55" stroke-width="1.5"/>
             <path d="M18 86 Q 48 ${50 + (seed * 5) % 24} 102 74" fill="none" stroke="${c1}" stroke-width="2.5" stroke-linecap="round"/>
@@ -1341,8 +1344,9 @@
         }
 
         // ---------- Renderers ----------
+        // Featured EP: track count, BPM range, price and button label all derive from TRACKS
         function renderHero() {
-          const epTracks = TRACKS.slice(0, 3);
+          const epTracks = TRACKS.filter(t => t.album === "Subzero Telemetry EP");
           document.getElementById("hero-cover").innerHTML = trackCover(epTracks[0]);
           document.getElementById("hero-tracks").innerHTML = epTracks.map((t, i) => `
             <div class="mini-row">
@@ -1356,6 +1360,13 @@
               <span class="mini-price tnum">$${t.price.toFixed(2)}</span>
             </div>
           `).join("");
+
+          const total = epTracks.reduce((sum, t) => sum + t.price, 0);
+          const bpms = epTracks.map(t => t.bpm);
+          document.getElementById("hero-ep-meta").textContent =
+            `${epTracks.length} tracks · 24-bit FLAC · ${Math.min(...bpms)}–${Math.max(...bpms)} BPM`;
+          document.getElementById("hero-ep-price").textContent = `$${total.toFixed(2)}`;
+          document.getElementById("hero-add-ep").textContent = `Add Full EP to Cart · $${total.toFixed(2)}`;
         }
 
         function renderChips() {
@@ -1452,8 +1463,14 @@
           renderAllPlayButtons();
         }
 
+        // Album spotlight: track count, total duration and bundle price stay in sync with TRACKS
         function renderAlbum() {
           const albumTracks = TRACKS.filter(t => t.album === "Neon Cartography");
+          const totalSec = albumTracks.reduce((sum, t) => sum + t.durSec, 0);
+          const totalPrice = albumTracks.reduce((sum, t) => sum + t.price, 0);
+          document.getElementById("album-meta").textContent =
+            `${albumTracks.length} tracks · ${fmtSec(totalSec)} total · Released Nov 2026 · 24-bit/48kHz`;
+          document.getElementById("album-add-all").textContent = `Buy Album · $${totalPrice.toFixed(2)}`;
           document.getElementById("album-cover").innerHTML = trackCover(albumTracks[0]);
           document.getElementById("album-track-table").innerHTML = albumTracks.map((t, i) => {
             const inCart = state.cart.some(c => c.id === t.id);
@@ -1792,6 +1809,15 @@
         document.getElementById("close-chat-btn").addEventListener("click", closeDrawers);
         document.getElementById("scrim").addEventListener("click", closeDrawers);
 
+        // Keyboard: Esc closes drawers and all modals, as required by aria-modal
+        document.addEventListener("keydown", (e) => {
+          if (e.key !== "Escape") return;
+          closeDrawers();
+          ["artist-modal", "detail-modal", "auth-modal"].forEach(id => {
+            document.getElementById(id).classList.remove("show");
+          });
+        });
+
         document.getElementById("close-artist-modal").addEventListener("click", () => document.getElementById("artist-modal").classList.remove("show"));
         document.getElementById("close-detail-modal").addEventListener("click", () => document.getElementById("detail-modal").classList.remove("show"));
         document.getElementById("close-auth-modal").addEventListener("click", () => document.getElementById("auth-modal").classList.remove("show"));
@@ -1815,16 +1841,18 @@
         });
 
         document.getElementById("hero-play-btn").addEventListener("click", () => togglePlay("t1"));
+        // Add the whole EP to cart: tracks resolved by album name, no hardcoded ids
         document.getElementById("hero-add-ep").addEventListener("click", () => {
-          ["t1", "t2", "t3"].forEach(id => {
-            if (!state.owned.has(id) && !state.cart.some(c => c.id === id)) state.cart.push({ id, format: "flac" });
+          TRACKS.filter(t => t.album === "Subzero Telemetry EP").forEach(t => {
+            if (!state.owned.has(t.id) && !state.cart.some(c => c.id === t.id)) state.cart.push({ id: t.id, format: "flac" });
           });
           renderAll();
           openCartDrawer();
         });
+        // Add the whole album to cart
         document.getElementById("album-add-all").addEventListener("click", () => {
-          ["t4", "t5", "t6"].forEach(id => {
-            if (!state.owned.has(id) && !state.cart.some(c => c.id === id)) state.cart.push({ id, format: "flac" });
+          TRACKS.filter(t => t.album === "Neon Cartography").forEach(t => {
+            if (!state.owned.has(t.id) && !state.cart.some(c => c.id === t.id)) state.cart.push({ id: t.id, format: "flac" });
           });
           renderAll();
           openCartDrawer();
