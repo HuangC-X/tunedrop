@@ -1,12 +1,3 @@
-# TuneDrop - https://huangc-x.github.io/tunedrop/
-# Updated 2026-11-27
-#
-# Policy: search engines stay allowed, AI training / content aggregation /
-# bulk scraping crawlers are blocked site-wide.
-# Note: robots.txt is an honour-system file, it only binds compliant crawlers
-# and is not access control. New user-agents appear regularly, so revisit this
-# list from time to time.
-
 # ---------------------------------------------------------------
 # 1. Search engines: explicitly allowed (keep the site indexable)
 # ---------------------------------------------------------------
